@@ -1,6 +1,7 @@
-<<<<<<< HEAD
-# local package
+# Local packages
 -e .
+
+# Main dependencies
 pandas
 numpy
 matplotlib
@@ -13,33 +14,10 @@ flask
 xgboost
 Flask-SQLAlchemy
 
-# external requirements
+# External requirements
 click
 Sphinx
 coverage
 awscli
 flake8
 python-dotenv>=0.5.1
-=======
-# local package
--e .
-pandas
-numpy
-matplotlib
-seaborn
-plotly
-statsmodels
-pmdarima
-gunicorn
-flask
-xgboost
-Flask-SQLAlchemy
-
-# external requirements
-click
-Sphinx
-coverage
-awscli
-flake8
-python-dotenv>=0.5.1
->>>>>>> e32bb1300ce3e2d156e41807520ad5492cd9fe99
