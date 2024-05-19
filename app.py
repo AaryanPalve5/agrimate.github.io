@@ -104,7 +104,7 @@ def require_login():
     allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home']
     login_route = 'login_rain'
 
-    if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_')):
+    if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_home', 'crop_index','crop_parameters')):
         login_route = 'login_crop'
 
     if request.endpoint not in allowed_routes and 'email' not in session:
