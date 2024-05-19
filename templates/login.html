@@ -129,7 +129,9 @@
          <br>
          {% if error %}<br><hr>
         <div class="alert alert-danger" role="alert"  style="font-size: 30px;">
-          {{ error }}
+          <script>
+            alert("{{ error }}")
+          </script>
         </div>
         {% endif %}
 
