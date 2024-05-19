@@ -14,6 +14,8 @@ flask
 xgboost
 Flask-SQLAlchemy
 
+bcrypt
+uvicorn
 # External requirements
 click
 Sphinx
@@ -21,5 +23,3 @@ coverage
 awscli
 flake8
 python-dotenv>=0.5.1
-
-bcrypt
