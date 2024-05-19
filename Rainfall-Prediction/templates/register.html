@@ -99,10 +99,6 @@
         font-family: 'Times New Roman', Times, serif;
         font-size: 14px;
     }
-    @media only screen and (max-width: 768px) {
-    .form-wrapper {
-        width: 100%; /* Adjusted width for smaller screens */
-    }}
   </style>
 </head>
 <body>
@@ -112,7 +108,9 @@
     <h1 class="form-title">Register</h1><hr><br>
     {% if error %}
     <div class="alert alert-danger" role="alert">
-      {{ error }}
+      <script>
+        alert("{{ error }}")
+      </script> 
     </div>
     {% endif %}
     <form action="{% if register_type == 'rain' %}/register_rain{% else %}/register_crop{% endif %}" method="POST">
