@@ -101,7 +101,7 @@ def require_login():
     if request.endpoint == 'static':
         return
 
-    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home']
+    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home',, 'crop_index','crop_parameters']
     login_route = 'login_rain'
 
     if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_home', 'crop_index','crop_parameters')):
