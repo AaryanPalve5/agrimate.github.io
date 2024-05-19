@@ -1,5 +1,7 @@
 # local package
 -e .
+bcrypt
+uvicorn
 pandas
 numpy
 matplotlib
