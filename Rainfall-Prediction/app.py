@@ -71,7 +71,7 @@ def login_rain():
         if user and user.check_password(password):
             session['email'] = user.email
             return redirect('/home')
-        return render_template('login.html', login_type='rain', error='Invalid User')
+        return render_template('login.html', login_type='rain', error='Invalid User .If this is your first time here please register first.')
     return render_template('login.html', login_type='rain')
 
 @app.route('/login_crop', methods=['GET', 'POST'])
@@ -83,7 +83,7 @@ def login_crop():
         if user and user.check_password(password):
             session['email'] = user.email
             return redirect('/crop_index')
-        return render_template('login.html', login_type='crop', error='Invalid User')
+        return render_template('login.html', login_type='crop', error='Invalid User.If this is your first time here please register first.')
     return render_template('login.html', login_type='crop')
 
 @app.route('/logout_rain')
@@ -101,7 +101,7 @@ def require_login():
     if request.endpoint == 'static':
         return
 
-    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home', 'crop_index','crop_parameters','vidarbha_prediction','vidarbha']
+    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home', 'crop_index','crop_parameters']
     login_route = 'login_rain'
 
     if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_home', 'crop_index','crop_parameters')):
