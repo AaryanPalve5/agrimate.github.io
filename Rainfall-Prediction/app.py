@@ -1,12 +1,12 @@
-import bz2
-import pickle
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import bz2
+import pickle
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -124,17 +124,32 @@ def konkan():
 
 @app.route('/konkan_prediction', methods=['POST'])
 def konkan_prediction():
-    model_path = "models/model1.pbz2"
-    with bz2.BZ2File(model_path, 'rb') as f:
-        model = pickle.load(f)
-    if request.method == 'POST':
-        num_periods = int(request.form['months'])
-        start_date = datetime(datetime.now().year + 1, 1, 1)
-        dates = [(start_date + relativedelta(months=i)).strftime('%B %Y') for i in range(num_periods)]
-        predictions = model.predict(n_periods=num_periods)
-        prediction_results = [{'Date': date, 'Rainfall': f"{prediction:.2f}"} for date, prediction in zip(dates, predictions)]
-        return render_template('result.html', prediction_results=prediction_results)
-    return 'Invalid request'
+    try:
+        model_path = "models/model1.pbz2"
+        with bz2.BZ2File(model_path, 'rb') as f:
+            model = pickle.load(f)
+        
+        if request.method == 'POST':
+            num_periods = int(request.form['months'])
+            start_date = datetime(datetime.now().year + 1, 1, 1)
+            dates = [(start_date + relativedelta(months=i)).strftime('%B %Y') for i in range(num_periods)]
+            predictions = model.predict(n_periods=num_periods)
+            prediction_results = [{'Date': date, 'Rainfall': f"{prediction:.2f}"} for date, prediction in zip(dates, predictions)]
+            return render_template('result.html', prediction_results=prediction_results)
+        
+        return 'Invalid request'
+    
+    except FileNotFoundError:
+        error_message = "Model file not found. Please contact support."
+        return render_template('error.html', error=error_message)
+    
+    except pickle.UnpicklingError:
+        error_message = "Error loading the model. Please try again later."
+        return render_template('error.html', error=error_message)
+    
+    except Exception as e:
+        error_message = f"Unexpected error occurred: {str(e)}"
+        return render_template('error.html', error=error_message)
 
 @app.route('/vidarbha')
 def vidarbha():

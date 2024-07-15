@@ -3,12 +3,14 @@
 
 # Main dependencies
 pandas
-numpy
+
 matplotlib
 seaborn
 plotly
 statsmodels
-pmdarima
+numpy==1.23.0
+pmdarima==1.8.2
+
 gunicorn
 flask
 xgboost
