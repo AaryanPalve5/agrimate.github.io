@@ -8,8 +8,8 @@ matplotlib
 seaborn
 plotly
 statsmodels
-numpy==1.23.0
-pmdarima==1.8.2
+numpy==1.26.4
+pmdarima==2.0.4
 
 gunicorn
 flask

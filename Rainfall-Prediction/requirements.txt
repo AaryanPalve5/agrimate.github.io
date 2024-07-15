@@ -1,22 +1,24 @@
-# local package
+# Local packages
 -e .
-bcrypt
-uvicorn
+
+# Main dependencies
 pandas
-numpy
+
 matplotlib
 seaborn
 plotly
 statsmodels
-pmdarima
+numpy==1.26.4
+pmdarima==2.0.4
+
 gunicorn
 flask
 xgboost
 Flask-SQLAlchemy
 
-
-
-# external requirements
+bcrypt
+uvicorn
+# External requirements
 click
 Sphinx
 coverage
