@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_caching import Cache
 import bcrypt
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
@@ -10,8 +13,18 @@ import pickle
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
 app.secret_key = 'secret_key'
+db = SQLAlchemy(app)
+
+# Rate Limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# Cache
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -29,10 +42,12 @@ with app.app_context():
     db.create_all()
 
 @app.route('/')
+@cache.cached(timeout=60)
 def newhome():
     return render_template('newhome.html')
 
 @app.route('/register_rain', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def register_rain():
     if request.method == 'POST':
         email = request.form['email']
@@ -48,6 +63,7 @@ def register_rain():
     return render_template('register.html', register_type='rain')
 
 @app.route('/register_crop', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def register_crop():
     if request.method == 'POST':
         email = request.form['email']
@@ -63,6 +79,7 @@ def register_crop():
     return render_template('register.html', register_type='crop')
 
 @app.route('/login_rain', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login_rain():
     if request.method == 'POST':
         email = request.form['email']
@@ -71,19 +88,20 @@ def login_rain():
         if user and user.check_password(password):
             session['email'] = user.email
             return redirect('/home')
-        return render_template('login.html', login_type='rain', error='Invalid User .If this is your first time here please register first.')
+        return render_template('login.html', login_type='rain', error='Invalid User. If this is your first time here please register first.')
     return render_template('login.html', login_type='rain')
 
 @app.route('/login_crop', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login_crop():
-    if request.method == 'POST':  # Corrected: Changed `]` to `)`
+    if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
             session['email'] = user.email
             return redirect('/crop_index')
-        return render_template('login.html', login_type='crop', error='Invalid User.If this is your first time here please register first.')
+        return render_template('login.html', login_type='crop', error='Invalid User. If this is your first time here please register first.')
     return render_template('login.html', login_type='crop')
 
 @app.route('/logout_rain')
@@ -101,28 +119,32 @@ def require_login():
     if request.endpoint == 'static':
         return
 
-    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home', 'crop_index','crop_parameters','vidarbha_prediction','vidarbha']
+    allowed_routes = ['login_rain', 'login_crop', 'register_rain', 'register_crop', 'newhome', 'ground0', 'crop_home', 'crop_index', 'crop_parameters', 'vidarbha_prediction', 'vidarbha']
     login_route = 'login_rain'
 
-    if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_home', 'crop_index','crop_parameters')):
+    if request.endpoint and request.endpoint.startswith(('login_crop', 'crop_home', 'crop_index', 'crop_parameters')):
         login_route = 'login_crop'
 
     if request.endpoint not in allowed_routes and 'email' not in session:
         return redirect(url_for(login_route))
 
 @app.route('/rain_home')
+@cache.cached(timeout=60)
 def ground0():
     return render_template('ground0.html')
 
 @app.route('/home')
+@cache.cached(timeout=60)
 def home():
     return render_template('home.html')
 
 @app.route('/konkan')
+@cache.cached(timeout=60)
 def konkan():
     return render_template('konkan.html')
 
 @app.route('/konkan_prediction', methods=['POST'])
+@limiter.limit("5 per minute")
 def konkan_prediction():
     try:
         model_path = "models/model1.pbz2"
@@ -152,10 +174,12 @@ def konkan_prediction():
         return render_template('error.html', error=error_message)
 
 @app.route('/vidarbha')
+@cache.cached(timeout=60)
 def vidarbha():
     return render_template('vidarbha.html')
 
 @app.route('/vidarbha_prediction', methods=['POST'])
+@limiter.limit("5 per minute")
 def vidarbha_prediction():
     model_path = "models/model4.pbz2"
     with bz2.BZ2File(model_path, 'rb') as f:
@@ -170,10 +194,12 @@ def vidarbha_prediction():
     return 'Invalid request'
 
 @app.route('/marathwada')
+@cache.cached(timeout=60)
 def marathwada():
     return render_template('marathwada.html')
 
 @app.route('/marathwada_prediction', methods=['POST'])
+@limiter.limit("5 per minute")
 def marathwada_prediction():
     model_path = "models/model3.pbz2"
     with bz2.BZ2File(model_path, 'rb') as f:
@@ -188,10 +214,12 @@ def marathwada_prediction():
     return 'Invalid request'
 
 @app.route('/madhya_maharashtra')
+@cache.cached(timeout=60)
 def madhya_maharashtra():
     return render_template('madhya_maharashtra.html')
 
 @app.route('/madhya_maharashtra_prediction', methods=['POST'])
+@limiter.limit("5 per minute")
 def madhya_maharashtra_prediction():
     model_path = "models/model2.pbz2"
     with bz2.BZ2File(model_path, 'rb') as f:
@@ -210,14 +238,17 @@ def decompress_pickle(file):
         return pickle.load(data)
 
 @app.route('/crop_home')
+@cache.cached(timeout=60)
 def crop_home():
     return render_template('crop_home.html')
 
 @app.route('/crop_index')
+@cache.cached(timeout=60)
 def crop_index():
     return render_template('crop_index.html')
 
 @app.route('/crop_parameters', methods=['POST'])
+@limiter.limit("5 per minute")
 def crop_parameters():
     try:
         # Decompress and load the model
@@ -242,16 +273,14 @@ def crop_parameters():
         
         # Decode the prediction
         decoded_labels = label_encoder.inverse_transform(predicted_crop)
-        predicted_crop=decoded_labels
+        predicted_crop = decoded_labels
         # Render the result template with prediction results
-        return render_template('crop_result.html',crop= predicted_crop[0])
+        return render_template('crop_result.html', crop=predicted_crop[0])
     
     except Exception as e:
         # Log and print any errors
         print(f"Error: {e}")
         return render_template('crop_result.html', crop="Error occurred during prediction")
-
-    return 'Invalid request'
 
 if __name__ == '__main__':
     app.run(debug=True)

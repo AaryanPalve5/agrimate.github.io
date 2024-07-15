@@ -10,6 +10,9 @@ plotly
 statsmodels
 numpy==1.26.4
 pmdarima==2.0.4
+Flask-Limiter
+Flask-Caching
+Flask-Celery-Helper
 
 gunicorn
 flask
