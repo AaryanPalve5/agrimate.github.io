@@ -7,7 +7,7 @@ import bcrypt
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 from datetime import datetime
-from dateutil.relativedelta import relativedeltapip
+from dateutil.relativedelta import relativedelta
 import bz2
 import pickle
 
